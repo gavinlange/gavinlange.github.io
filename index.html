@@ -1,28 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Workout Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
-  <style>
-    body { font-family: monospace; margin: 10px; background: #f9f9f9; }
-    h1 { font-size: 1.4em; }
-    textarea, input, button { width: 100%; margin: 5px 0; font-size: 1em; }
-    pre { background: #fff; padding: 10px; border: 1px solid #ccc; }
-  </style>
+<meta charset="UTF-8">
+<title>Workout Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    margin: 0;
+    padding: 15px;
+    color: #333;
+  }
+  h1 {
+    text-align: center;
+    color: #222;
+    font-size: 1.6em;
+    margin-bottom: 15px;
+  }
+  .card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+  }
+  label {
+    font-weight: bold;
+    margin-top: 10px;
+    display: block;
+  }
+  input, textarea, button {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+  button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background: #45a049;
+  }
+  .history {
+    white-space: pre-wrap;
+    font-family: monospace;
+  }
+</style>
 </head>
 <body>
 
 <h1>Workout Tracker</h1>
 
-<h3>Add Workout</h3>
-<input id="date" type="date">
-<textarea id="log" rows="5" placeholder="e.g. Bench Press: 3x10x135"></textarea>
-<button onclick="saveWorkout()">Save Workout</button>
+<div class="card">
+  <label for="date">Date</label>
+  <input id="date" type="date">
 
-<h3>Past Workouts</h3>
-<pre id="history"></pre>
+  <label for="log">Workout Details</label>
+  <textarea id="log" rows="4" placeholder="e.g. Bench Press: 3x10x135"></textarea>
+
+  <button onclick="saveWorkout()">💾 Save Workout</button>
+</div>
+
+<div class="card">
+  <h2>Past Workouts</h2>
+  <div id="history" class="history"></div>
+</div>
 
 <script>
 let workouts = JSON.parse(localStorage.getItem('workouts') || '[]');
@@ -42,7 +94,7 @@ function loadHistory() {
   workouts.sort((a,b) => new Date(b.date) - new Date(a.date));
   let text = '';
   for (let w of workouts) {
-    text += `${w.date}:\n${w.log}\n\n`;
+    text += `📅 ${w.date}\n${w.log}\n\n`;
   }
   document.getElementById('history').textContent = text.trim();
 }
