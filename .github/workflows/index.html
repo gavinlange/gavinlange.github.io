@@ -1,353 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Workout Tracker</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Workout">
-  <style>
-    :root { --bg:#0f1115; --card:#161a22; --text:#e7e9ee; --muted:#9aa3b2; --accent:#4caf50; --danger:#e34d4d; }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0; background: var(--bg); color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial, sans-serif;
-      padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom) 12px;
-    }
-    header { text-align:center; padding: 8px 0 4px; }
-    h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: .2px; }
-    .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
-    .card {
-      background: var(--card); border: 1px solid #202635; border-radius: 14px; padding: 12px; margin: 10px 0;
-      box-shadow: 0 6px 16px rgba(0,0,0,.25);
-    }
-    label { display:block; font-weight:600; font-size:13px; margin-top:8px; color: var(--muted); }
-    input, select, textarea, button {
-      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #2a3040; background:#0e1219; color: var(--text);
-      font-size: 15px;
-    }
-    input[type="date"]{ background:#0e1219; }
-    textarea { min-height: 70px; resize: vertical; }
-    button { background: var(--accent); border:none; font-weight:700; cursor:pointer; }
-    button.ghost { background: transparent; border:1px solid #2a3040; }
-    button.danger { background: var(--danger); }
-    .row { display:flex; gap:8px; }
-    .row > * { flex: 1; }
-    .pill {
-      display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; border:1px solid #2a3040; color:var(--muted); font-size:12px; margin-right:6px;
-    }
-    .list { display:flex; flex-direction:column; gap:8px; }
-    .list-item {
-      background:#111622; border:1px solid #22283a; border-radius:12px; padding:10px;
-    }
-    .muted { color: var(--muted); }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
-    .spacer { height: 8px; }
-    .small { font-size: 12px; }
-    .right { text-align:right; }
-    .grid { display:grid; grid-template-columns: 1fr auto; gap: 6px; align-items:center; }
-    .sep { height:1px; background:#202635; margin:8px 0; }
-    .tag { font-size:11px; color:var(--muted); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Workout Tracker</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workout">
+<style>
+:root { --bg:#0f1115; --card:#161a22; --text:#e7e9ee; --muted:#9aa3b2; --accent:#4caf50; --danger:#e34d4d; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial, sans-serif; padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom) 12px; }
+header { text-align:center; padding: 8px 0 4px; }
+h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: .2px; }
+.sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.card { background: white; border-radius: 14px; padding: 12px; margin: 10px 0; box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+label { display:block; font-weight:600; font-size:13px; margin-top:8px; color: var(--muted); }
+input, select, textarea, button { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 15px; }
+textarea { min-height: 70px; resize: vertical; }
+button { background: var(--accent); border:none; font-weight:700; cursor:pointer; transition: background 0.2s; }
+button:hover { background: #45a049; }
+button.ghost { background: transparent; border:1px solid #2a3040; }
+button.danger { background: var(--danger); }
+.row { display:flex; gap:8px; }
+.row > * { flex: 1; }
+.list { display:flex; flex-direction:column; gap:8px; }
+.list-item { background:#111622; border-radius:12px; padding:10px; display:flex; justify-content: space-between; align-items:center; }
+.muted { color: var(--muted); }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+.spacer { height: 8px; }
+small { font-size: 12px; }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Workout Tracker</h1>
-    <div class="sub">Simple progressive overload • Offline-first</div>
-  </header>
+<header>
+  <h1>Workout Tracker</h1>
+  <div class="sub">Offline + Templates + Suggestions</div>
+</header>
 
-  <div class="card">
-    <div class="row">
-      <div>
-        <label for="date">Date</label>
-        <input id="date" type="date">
-      </div>
-      <div>
-        <label for="exercise">Exercise</label>
-        <input id="exercise" type="text" placeholder="e.g., Bench Press">
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label for="reps">Reps</label>
-        <input id="reps" type="number" inputmode="numeric" placeholder="e.g., 8">
-      </div>
-      <div>
-        <label for="weight">Weight</label>
-        <input id="weight" type="number" inputmode="decimal" step="0.5" placeholder="e.g., 135">
-      </div>
-    </div>
-    <div class="row">
-      <button id="addSetBtn">+ Add Set</button>
-      <button id="saveWorkoutBtn">💾 Save Workout</button>
-    </div>
-    <div class="spacer"></div>
-    <div id="lastCompare" class="small muted"></div>
+<div class="card">
+  <label for="date">Date</label>
+  <input id="date" type="date">
+
+  <label for="exercise">Exercise</label>
+  <input id="exercise" type="text" placeholder="Start typing...">
+  <div id="suggestions" class="muted small"></div>
+
+  <label for="reps">Reps</label>
+  <input id="reps" type="number" inputmode="numeric">
+
+  <label for="weight">Weight</label>
+  <input id="weight" type="number" inputmode="decimal" step="0.5">
+
+  <div class="row">
+    <button id="addSetBtn">+ Add Set</button>
+    <button id="saveWorkoutBtn">💾 Save Workout</button>
   </div>
 
-  <div class="card">
-    <div class="grid">
-      <strong>Current Workout</strong>
-      <button id="clearCurrentBtn" class="ghost small">Clear</button>
-    </div>
-    <div id="currentList" class="list"></div>
+  <div class="row" style="margin-top:8px;">
+    <button id="saveTemplateBtn" class="ghost">⭐ Save as Template</button>
+    <button id="loadTemplateBtn" class="ghost">📂 Load Template</button>
   </div>
 
-  <div class="card">
-    <div class="grid">
-      <strong>History</strong>
-      <div class="right">
-        <button id="exportBtn" class="ghost small">Export</button>
-        <button id="importBtn" class="ghost small">Import</button>
-        <input id="importFile" type="file" accept="application/json" style="display:none">
-      </div>
-    </div>
-    <div id="history"></div>
-  </div>
+  <div class="spacer"></div>
+  <div id="lastCompare" class="small muted"></div>
+</div>
 
-  <template id="setRowTpl">
-    <div class="list-item grid">
-      <div>
-        <div><strong class="mono ex-name"></strong></div>
-        <div class="tag mono set-desc"></div>
-      </div>
-      <div class="right mono trend"></div>
-    </div>
-  </template>
+<div class="card">
+  <strong>Current Workout</strong>
+  <div id="currentList" class="list"></div>
+</div>
 
-  <script>
-    // --- Storage helpers ---
-    const STORAGE_KEY = "workouts_v2";
-    const workouts = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    function saveAll() { localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts)); }
+<div class="card">
+  <strong>History</strong>
+  <div id="history"></div>
+</div>
 
-    // --- State for current unsaved workout ---
-    const current = { date: todayStr(), sets: [] }; // {name, reps, weight}
-    const byExercise = () => {
-      const map = {};
-      for (const set of current.sets) {
-        map[set.name] = map[set.name] || [];
-        map[set.name].push(set);
-      }
-      return map;
-    };
+<script>
+let workouts = JSON.parse(localStorage.getItem('workouts')||'[]');
+let exercises = JSON.parse(localStorage.getItem('exercises')||'[]');
+let templates = JSON.parse(localStorage.getItem('templates')||'[]');
+let current = {date: todayStr(), sets: []};
 
-    // --- DOM refs ---
-    const dateEl = document.getElementById("date");
-    const exerciseEl = document.getElementById("exercise");
-    const repsEl = document.getElementById("reps");
-    const weightEl = document.getElementById("weight");
-    const addSetBtn = document.getElementById("addSetBtn");
-    const saveWorkoutBtn = document.getElementById("saveWorkoutBtn");
-    const currentList = document.getElementById("currentList");
-    const historyEl = document.getElementById("history");
-    const lastCompareEl = document.getElementById("lastCompare");
-    const clearCurrentBtn = document.getElementById("clearCurrentBtn");
-    const exportBtn = document.getElementById("exportBtn");
-    const importBtn = document.getElementById("importBtn");
-    const importFile = document.getElementById("importFile");
+const dateEl = document.getElementById('date');
+const exerciseEl = document.getElementById('exercise');
+const repsEl = document.getElementById('reps');
+const weightEl = document.getElementById('weight');
+const addSetBtn = document.getElementById('addSetBtn');
+const saveWorkoutBtn = document.getElementById('saveWorkoutBtn');
+const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+const loadTemplateBtn = document.getElementById('loadTemplateBtn');
+const suggestionsEl = document.getElementById('suggestions');
+const currentList = document.getElementById('currentList');
+const historyEl = document.getElementById('history');
+const lastCompareEl = document.getElementById('lastCompare');
 
-    // --- Init ---
-    dateEl.value = todayStr();
-    registerSW();
-    render();
+dateEl.value = todayStr();
 
-    // --- Events ---
-    addSetBtn.addEventListener("click", () => {
-      const name = (exerciseEl.value || "").trim();
-      const reps = +repsEl.value;
-      const weight = +weightEl.value;
-      const date = dateEl.value || todayStr();
-      if (!name || !reps || !weight) { alert("Enter exercise, reps, and weight"); return; }
-      current.date = date;
-      current.sets.push({ name, reps, weight });
-      // Show immediate comparison for this exercise vs last session
-      const cmp = compareAgainstLast(name, { reps, weight });
-      lastCompareEl.textContent = cmp.message;
-      exerciseEl.focus();
-      repsEl.value = "";
-      weightEl.value = "";
-      render();
+function saveAll(){ localStorage.setItem('workouts', JSON.stringify(workouts));
+localStorage.setItem('exercises', JSON.stringify(exercises));
+localStorage.setItem('templates', JSON.stringify(templates)); }
+
+function addSet(){
+  const name = exerciseEl.value.trim();
+  const reps = +repsEl.value;
+  const weight = +weightEl.value;
+  const date = dateEl.value;
+  if(!name||!reps||!weight){ alert('Enter exercise, reps, weight'); return; }
+  current.date=date; current.sets.push({name,reps,weight});
+  if(!exercises.includes(name)){ exercises.push(name); saveAll(); }
+  exerciseEl.value=''; repsEl.value=''; weightEl.value=''; renderSuggestions(); renderCurrent();
+}
+
+function saveWorkout(){
+  if(!current.sets.length){ alert('Add sets first'); return; }
+  workouts.push({date:current.date, sets:current.sets});
+  workouts.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  current={date:todayStr(),sets:[]}; saveAll(); render(); alert('Workout saved');
+}
+
+function renderSuggestions(){
+  const val = exerciseEl.value.toLowerCase();
+  const matches = exercises.filter(e=>e.toLowerCase().includes(val)&&val);
+  suggestionsEl.textContent = matches.join(', ');
+}
+exerciseEl.addEventListener('input', renderSuggestions);
+addSetBtn.addEventListener('click', addSet);
+saveWorkoutBtn.addEventListener('click', saveWorkout);
+
+saveTemplateBtn.addEventListener('click', ()=>{
+  if(!current.sets.length){ alert('Add sets first'); return; }
+  const name = prompt('Template name?'); if(!name) return;
+  templates.push({name, sets:current.sets}); saveAll(); alert('Template saved');
+});
+
+loadTemplateBtn.addEventListener('click', ()=>{
+  if(!templates.length){ alert('No templates saved'); return; }
+  const names = templates.map(t=>t.name).join('\n');
+  const sel = prompt('Available templates:\n'+names); if(!sel) return;
+  const t = templates.find(x=>x.name===sel); if(!t) return alert('Not found');
+  current.sets = JSON.parse(JSON.stringify(t.sets)); renderCurrent();
+});
+
+function renderCurrent(){
+  currentList.innerHTML='';
+  if(!current.sets.length){ currentList.textContent='No sets added yet'; return; }
+  current.sets.forEach(s=>{
+    const div = document.createElement('div'); div.className='list-item';
+    div.innerHTML=`<span>${s.name}: ${s.reps}x @ ${s.weight}</span>`;
+    currentList.appendChild(div);
+  });
+}
+
+function renderHistory(){
+  if(!workouts.length){ historyEl.textContent='No past workouts'; return; }
+  historyEl.innerHTML='';
+  workouts.forEach(w=>{
+    const div = document.createElement('div'); div.className='card';
+    const dateHeader = document.createElement('strong'); dateHeader.textContent='📅 '+w.date;
+    div.appendChild(dateHeader);
+    w.sets.forEach(s=>{
+      const li = document.createElement('div'); li.className='list-item';
+      li.textContent=`${s.name}: ${s.reps}x @ ${s.weight}`; div.appendChild(li);
     });
+    historyEl.appendChild(div);
+  });
+}
 
-    saveWorkoutBtn.addEventListener("click", () => {
-      if (!current.sets.length) { alert("Add at least one set"); return; }
-      workouts.push({ date: current.date || todayStr(), sets: current.sets });
-      // sort newest first
-      workouts.sort((a,b) => new Date(b.date) - new Date(a.date));
-      saveAll();
-      // reset current
-      current.date = dateEl.value = todayStr();
-      current.sets = [];
-      lastCompareEl.textContent = "";
-      render();
-      alert("Workout saved!");
-    });
+function todayStr(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 
-    clearCurrentBtn.addEventListener("click", () => {
-      if (confirm("Clear current unsaved sets?")) {
-        current.sets = [];
-        lastCompareEl.textContent = "";
-        render();
-      }
-    });
-
-    exportBtn.addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify(workouts, null, 2)], {type:"application/json"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "workouts.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    importBtn.addEventListener("click", () => importFile.click());
-    importFile.addEventListener("change", async () => {
-      const file = importFile.files[0];
-      if (!file) return;
-      const text = await file.text();
-      try {
-        const data = JSON.parse(text);
-        if (!Array.isArray(data)) throw new Error("Invalid data");
-        workouts.splice(0, workouts.length, ...data);
-        saveAll();
-        render();
-        alert("Imported!");
-      } catch (e) {
-        alert("Could not import: " + e.message);
-      } finally {
-        importFile.value = "";
-      }
-    });
-
-    // --- Rendering ---
-    function render() {
-      renderCurrent();
-      renderHistory();
-    }
-
-    function renderCurrent() {
-      currentList.innerHTML = "";
-      const tpl = document.getElementById("setRowTpl");
-      const grouped = byExercise();
-      Object.keys(grouped).forEach(name => {
-        const sets = grouped[name];
-        const best = topSet(sets);
-        const cmp = compareAgainstLast(name, best);
-        const node = tpl.content.cloneNode(true);
-        node.querySelector(".ex-name").textContent = name;
-        node.querySelector(".set-desc").textContent = sets.map(s => `${s.reps} reps @ ${s.weight}`).join(" • ");
-        node.querySelector(".trend").textContent = cmp.icon + " " + cmp.short;
-        currentList.appendChild(node);
-      });
-      if (!current.sets.length) {
-        const empty = document.createElement("div");
-        empty.className = "muted small";
-        empty.textContent = "No sets added yet.";
-        currentList.appendChild(empty);
-      }
-    }
-
-    function renderHistory() {
-      if (!workouts.length) { historyEl.innerHTML = '<div class="muted small">No past workouts yet.</div>'; return; }
-      const html = workouts.map(w => {
-        const lines = [];
-        const grouped = {};
-        for (const s of w.sets) {
-          grouped[s.name] = grouped[s.name] || [];
-          grouped[s.name].push(s);
-        }
-        for (const [name, sets] of Object.entries(grouped)) {
-          const ts = topSet(sets);
-          const cmp = compareAgainstPrevWorkout(w.date, name, ts);
-          lines.push(`<div class="list-item grid">
-            <div>
-              <div><strong class="mono">${escapeHtml(name)}</strong></div>
-              <div class="tag mono">${sets.map(s => `${s.reps} reps @ ${s.weight}`).join(" • ")}</div>
-            </div>
-            <div class="right mono">${cmp.icon} ${cmp.short}</div>
-          </div>`);
-        }
-        return `<div class="card"><div class="grid"><div><strong>📅 ${w.date}</strong></div>
-          <div class="right tag">Volume: ${totalVolume(w)}</div></div>
-          <div class="sep"></div>
-          <div class="list">${lines.join("")}</div></div>`;
-      }).join("");
-      historyEl.innerHTML = html;
-    }
-
-    // --- Progressive overload helpers ---
-    function compareAgainstLast(name, set) {
-      // Find the last workout containing this exercise
-      for (const w of workouts) {
-        const same = w.sets.filter(s => s.name.toLowerCase() === name.toLowerCase());
-        if (same.length) {
-          const prev = topSet(same);
-          return trend(prev, set, `Last ${name}: ${prev.reps} reps @ ${prev.weight}`);
-        }
-      }
-      return { icon: "🆕", short: "New", message: "No previous data for " + name };
-    }
-
-    function compareAgainstPrevWorkout(date, name, set) {
-      // Compare this workout's top set vs the previous workout (earlier than date)
-      let sawCurrent = false;
-      for (const w of workouts) {
-        if (!sawCurrent) {
-          if (w.date === date) { sawCurrent = true; continue; }
-        } else {
-          const same = w.sets.filter(s => s.name.toLowerCase() === name.toLowerCase());
-          if (same.length) {
-            const prev = topSet(same);
-            return trend(prev, set);
-          }
-        }
-      }
-      return { icon: "🆕", short: "New", message: "No previous comparison." };
-    }
-
-    function trend(prev, cur, prefixMsg) {
-      // Compare by weight first, then reps at same weight
-      let icon = "→", short = "Same", message = prefixMsg || "";
-      if (cur.weight > prev.weight) { icon = "📈"; short = "+ Weight"; }
-      else if (cur.weight < prev.weight) { icon = "📉"; short = "- Weight"; }
-      else {
-        if (cur.reps > prev.reps) { icon = "📈"; short = "+ Reps"; }
-        else if (cur.reps < prev.reps) { icon = "📉"; short = "- Reps"; }
-      }
-      if (!message) message = `Prev: ${prev.reps} reps @ ${prev.weight} → Now: ${cur.reps} @ ${cur.weight}`;
-      return { icon, short, message };
-    }
-
-    function topSet(sets) {
-      // "Top set" = highest weight; tiebreaker by reps
-      return sets.slice().sort((a,b) => b.weight - a.weight || b.reps - a.reps)[0];
-    }
-
-    function totalVolume(workout) {
-      return workout.sets.reduce((sum, s) => sum + (s.reps * s.weight), 0);
-    }
-
-    function todayStr() {
-      const d = new Date();
-      const m = String(d.getMonth()+1).padStart(2,"0");
-      const day = String(d.getDate()).padStart(2,"0");
-      return `${d.getFullYear()}-${m}-${day}`;
-    }
-
-    function escapeHtml(s){ return s.replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&#39;","\"":"&#34;"}[m]||m)); }
-
-    // --- PWA ---
-    async function registerSW() {
-      if ("serviceWorker" in navigator) {
-        try { await navigator.serviceWorker.register("sw.js"); }
-        catch(e){ /* ignore */ }
-      }
-    }
-  </script>
+renderCurrent(); renderHistory(); renderSuggestions();
+</script>
 </body>
 </html>
