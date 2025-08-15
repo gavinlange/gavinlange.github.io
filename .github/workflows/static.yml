@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Workout Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body { font-family: monospace; margin: 10px; background: #f9f9f9; }
+    h1 { font-size: 1.4em; }
+    textarea, input, button { width: 100%; margin: 5px 0; font-size: 1em; }
+    pre { background: #fff; padding: 10px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+<h1>Workout Tracker</h1>
+
+<h3>Add Workout</h3>
+<input id="date" type="date">
+<textarea id="log" rows="5" placeholder="e.g. Bench Press: 3x10x135"></textarea>
+<button onclick="saveWorkout()">Save Workout</button>
+
+<h3>Past Workouts</h3>
+<pre id="history"></pre>
+
+<script>
+let workouts = JSON.parse(localStorage.getItem('workouts') || '[]');
+
+function saveWorkout() {
+  const date = document.getElementById('date').value;
+  const log = document.getElementById('log').value.trim();
+  if (!date || !log) return alert('Enter a date and workout details');
+
+  workouts.push({ date, log });
+  localStorage.setItem('workouts', JSON.stringify(workouts));
+  document.getElementById('log').value = '';
+  loadHistory();
+}
+
+function loadHistory() {
+  workouts.sort((a,b) => new Date(b.date) - new Date(a.date));
+  let text = '';
+  for (let w of workouts) {
+    text += `${w.date}:\n${w.log}\n\n`;
+  }
+  document.getElementById('history').textContent = text.trim();
+}
+
+loadHistory();
+</script>
+
+</body>
+</html>
