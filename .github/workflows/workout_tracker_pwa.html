@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Workout Tracker</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workout">
+<style>
+:root { --bg:#0f1115; --card:#161a22; --text:#e7e9ee; --muted:#9aa3b2; --accent:#4caf50; --danger:#e34d4d; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial, sans-serif; padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom) 12px; }
+header { text-align:center; padding: 8px 0 4px; }
+h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: .2px; }
+.sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.card { background: white; border-radius: 14px; padding: 12px; margin: 10px 0; box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+label { display:block; font-weight:600; font-size:13px; margin-top:8px; color: var(--muted); }
+input, select, textarea, button { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 15px; }
+textarea { min-height: 70px; resize: vertical; }
+button { background: var(--accent); border:none; font-weight:700; cursor:pointer; transition: background 0.2s; }
+button:hover { background: #45a049; }
+button.ghost { background: transparent; border:1px solid #2a3040; }
+button.danger { background: var(--danger); }
+.row { display:flex; gap:8px; }
+.row > * { flex: 1; }
+.list { display:flex; flex-direction:column; gap:8px; }
+.list-item { background:#111622; border-radius:12px; padding:10px; display:flex; justify-content: space-between; align-items:center; }
+.muted { color: var(--muted); }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+.spacer { height: 8px; }
+small { font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Workout Tracker</h1>
+  <div class="sub">Offline + Templates + Suggestions</div>
+</header>
+
+<div class="card">
+  <label for="date">Date</label>
+  <input id="date" type="date">
+
+  <label for="exercise">Exercise</label>
+  <input id="exercise" type="text" placeholder="Start typing...">
+  <div id="suggestions" class="muted small"></div>
+
+  <label for="reps">Reps</label>
+  <input id="reps" type="number" inputmode="numeric">
+
+  <label for="weight">Weight</label>
+  <input id="weight" type="number" inputmode="decimal" step="0.5">
+
+  <div class="row">
+    <button id="addSetBtn">+ Add Set</button>
+    <button id="saveWorkoutBtn">💾 Save Workout</button>
+  </div>
+
+  <div class="row" style="margin-top:8px;">
+    <button id="saveTemplateBtn" class="ghost">⭐ Save as Template</button>
+    <button id="loadTemplateBtn" class="ghost">📂 Load Template</button>
+  </div>
+
+  <div class="spacer"></div>
+  <div id="lastCompare" class="small muted"></div>
+</div>
+
+<div class="card">
+  <strong>Current Workout</strong>
+  <div id="currentList" class="list"></div>
+</div>
+
+<div class="card">
+  <strong>History</strong>
+  <div id="history"></div>
+</div>
+
+<script>
+let workouts = JSON.parse(localStorage.getItem('workouts')||'[]');
+let exercises = JSON.parse(localStorage.getItem('exercises')||'[]');
+let templates = JSON.parse(localStorage.getItem('templates')||'[]');
+let current = {date: todayStr(), sets: []};
+
+const dateEl = document.getElementById('date');
+const exerciseEl = document.getElementById('exercise');
+const repsEl = document.getElementById('reps');
+const weightEl = document.getElementById('weight');
+const addSetBtn = document.getElementById('addSetBtn');
+const saveWorkoutBtn = document.getElementById('saveWorkoutBtn');
+const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+const loadTemplateBtn = document.getElementById('loadTemplateBtn');
+const suggestionsEl = document.getElementById('suggestions');
+const currentList = document.getElementById('currentList');
+const historyEl = document.getElementById('history');
+const lastCompareEl = document.getElementById('lastCompare');
+
+dateEl.value = todayStr();
+
+function saveAll(){ localStorage.setItem('workouts', JSON.stringify(workouts));
+localStorage.setItem('exercises', JSON.stringify(exercises));
+localStorage.setItem('templates', JSON.stringify(templates)); }
+
+function addSet(){
+  const name = exerciseEl.value.trim();
+  const reps = +repsEl.value;
+  const weight = +weightEl.value;
+  const date = dateEl.value;
+  if(!name||!reps||!weight){ alert('Enter exercise, reps, weight'); return; }
+  current.date=date; current.sets.push({name,reps,weight});
+  if(!exercises.includes(name)){ exercises.push(name); saveAll(); }
+  exerciseEl.value=''; repsEl.value=''; weightEl.value=''; renderSuggestions(); renderCurrent();
+}
+
+function saveWorkout(){
+  if(!current.sets.length){ alert('Add sets first'); return; }
+  workouts.push({date:current.date, sets:current.sets});
+  workouts.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  current={date:todayStr(),sets:[]}; saveAll(); render(); alert('Workout saved');
+}
+
+function renderSuggestions(){
+  const val = exerciseEl.value.toLowerCase();
+  const matches = exercises.filter(e=>e.toLowerCase().includes(val)&&val);
+  suggestionsEl.textContent = matches.join(', ');
+}
+exerciseEl.addEventListener('input', renderSuggestions);
+addSetBtn.addEventListener('click', addSet);
+saveWorkoutBtn.addEventListener('click', saveWorkout);
+
+saveTemplateBtn.addEventListener('click', ()=>{
+  if(!current.sets.length){ alert('Add sets first'); return; }
+  const name = prompt('Template name?'); if(!name) return;
+  templates.push({name, sets:current.sets}); saveAll(); alert('Template saved');
+});
+
+loadTemplateBtn.addEventListener('click', ()=>{
+  if(!templates.length){ alert('No templates saved'); return; }
+  const names = templates.map(t=>t.name).join('\n');
+  const sel = prompt('Available templates:\n'+names); if(!sel) return;
+  const t = templates.find(x=>x.name===sel); if(!t) return alert('Not found');
+  current.sets = JSON.parse(JSON.stringify(t.sets)); renderCurrent();
+});
+
+function renderCurrent(){
+  currentList.innerHTML='';
+  if(!current.sets.length){ currentList.textContent='No sets added yet'; return; }
+  current.sets.forEach(s=>{
+    const div = document.createElement('div'); div.className='list-item';
+    div.innerHTML=`<span>${s.name}: ${s.reps}x @ ${s.weight}</span>`;
+    currentList.appendChild(div);
+  });
+}
+
+function renderHistory(){
+  if(!workouts.length){ historyEl.textContent='No past workouts'; return; }
+  historyEl.innerHTML='';
+  workouts.forEach(w=>{
+    const div = document.createElement('div'); div.className='card';
+    const dateHeader = document.createElement('strong'); dateHeader.textContent='📅 '+w.date;
+    div.appendChild(dateHeader);
+    w.sets.forEach(s=>{
+      const li = document.createElement('div'); li.className='list-item';
+      li.textContent=`${s.name}: ${s.reps}x @ ${s.weight}`; div.appendChild(li);
+    });
+    historyEl.appendChild(div);
+  });
+}
+
+function todayStr(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+renderCurrent(); renderHistory(); renderSuggestions();
+</script>
+</body>
+</html>
